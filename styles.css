@@ -1,0 +1,102 @@
+/* General Styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: url('assets/bg-\ image.png') no-repeat center center fixed;
+    background-size: cover;
+    color: #000;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #ffff
+}
+
+.logo img {
+    height: 50px;
+}
+
+.tagline {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.tools-dropdown button {
+    background-color: #A2D2FF;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.tools-dropdown button:hover {
+    background-color: #CDB4DB;
+}
+
+/* Card Container */
+.card-container {
+    display: flex;
+    justify-content: space-around;
+    margin: 50px 20px;
+}
+
+.card {
+    background-color: #FFF;
+    border: 2px solid #CDB4DB;
+    border-radius: 10px;
+    text-align: center;
+    padding: 20px;
+    width: 200px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+}
+
+.card img {
+    width: 80px;
+    height: 80px;
+}
+
+.card h2 {
+    font-size: 18px;
+    margin: 20px 0;
+}
+
+.card p {
+    font-size: 14px;
+    color: #333;
+}
+
+.start-button {
+    background-color: #A2D2FF;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    color: #FFF;
+    transition: background-color 0.2s;
+}
+
+.start-button:hover {
+    background-color: #CDB4DB;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: rgba(255, 175, 204, 0.9);
+    font-size: 16px;
+    font-weight: bold;
+}
+
+footer span {
+    color: red;
+}

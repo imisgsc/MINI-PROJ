@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SwiftLink</title>
+    <title>SwiftLink URL Shortener</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inria+Sans:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
@@ -25,13 +27,91 @@
                 <a href="#">NOTES ADDER</a>
             </div>
         </div>
-        
     </header>
     <main>
-        
+        <div class="shortener-container">
+            <h1>SwiftLink - URL Shortener</h1>
+            <input type="text" id="original-url" placeholder="Enter your long URL here">
+            <button id="generate-btn">Generate Short URL</button>
+
+            <div id="result-container" style="display: none;">
+                <p>Shortened URL: <span id="shortened-url"></span></p>
+                <button id="copy-btn">Copy URL</button>
+                <button id="reset-btn">Reset</button>
+                <button id="regenerate-btn">Regenerate</button>
+                <p id="expiry-message">Link expires in <span id="timer">10:00</span> minutes</p>
+            </div>
+        </div>
     </main>
+
     <footer>
         <p>MADE WITH <span>❤️</span> BY TEAM SSAV</p>
     </footer>
+
+    <script>
+        const generateBtn = document.getElementById('generate-btn');
+        const resultContainer = document.getElementById('result-container');
+        const shortenedUrl = document.getElementById('shortened-url');
+        const copyBtn = document.getElementById('copy-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const regenerateBtn = document.getElementById('regenerate-btn');
+        const timerElement = document.getElementById('timer');
+        let countdownInterval;
+
+        function generateShortURL() {
+            const originalUrl = document.getElementById('original-url').value;
+            if (originalUrl === '') {
+                alert('Please enter a valid URL');
+                return;
+            }
+
+            const shortUrl = 'swiftlink-' + Math.random().toString(36).substring(2, 8);
+            shortenedUrl.textContent = shortUrl;
+            resultContainer.style.display = 'block';
+            startCountdown();
+        }
+
+        function startCountdown() {
+            let timeLeft = 600; // 10 minutes in seconds
+
+            countdownInterval = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerElement.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+                
+                if (timeLeft === 0) {
+                    clearInterval(countdownInterval);
+                    shortenedUrl.textContent = 'Link Expired';
+                }
+
+                timeLeft--;
+            }, 1000);
+        }
+
+        function resetShortURL() {
+            document.getElementById('original-url').value = '';
+            shortenedUrl.textContent = '';
+            resultContainer.style.display = 'none';
+            clearInterval(countdownInterval);
+            timerElement.textContent = '10:00';
+        }
+
+        function regenerateShortURL() {
+            clearInterval(countdownInterval);
+            generateShortURL();
+        }
+
+        function copyToClipboard() {
+            const textToCopy = shortenedUrl.textContent;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert('Shortened URL copied to clipboard');
+            });
+        }
+
+        generateBtn.addEventListener('click', generateShortURL);
+        resetBtn.addEventListener('click', resetShortURL);
+        regenerateBtn.addEventListener('click', regenerateShortURL);
+        copyBtn.addEventListener('click', copyToClipboard);
+    </script>
 </body>
 </html>

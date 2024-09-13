@@ -9,6 +9,90 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inria+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-firestore.js";
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCVc09kuS08iwwky7PlX-3isJXHuSOQWOc",
+            authDomain: "swiftlink-48d4f.firebaseapp.com",
+            projectId: "swiftlink-48d4f",
+            storageBucket: "swiftlink-48d4f.appspot.com",
+            messagingSenderId: "820735048662",
+            appId: "1:820735048662:web:d8b239066781c6cb188277",
+            measurementId: "G-2VN60N67E6"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Function to generate a short URL and save it to Firestore
+        async function generateShortURL() {
+            const originalUrl = document.getElementById('original-url').value;
+            if (originalUrl === '') {
+                alert('Please enter a valid URL');
+                return;
+            }
+
+            const shortUrl = 'swiftlink-' + Math.random().toString(36).substring(2, 8);
+            const expiryTime = Date.now() + 10 * 60 * 1000; // 10 minutes from now
+
+            // Save the shortened URL and original URL to Firestore
+            try {
+                const docRef = await addDoc(collection(db, "urls"), {
+                    originalUrl: originalUrl,
+                    shortUrl: shortUrl,
+                    expiryTime: expiryTime
+                });
+
+                console.log("Document written with ID: ", docRef.id);
+                document.getElementById('shortened-url').textContent = `https://swiftlink.com/${shortUrl}`;
+                document.getElementById('result-container').style.display = 'block';
+                startCountdown(expiryTime, shortUrl);
+            } catch (e) {
+                console.error("Error adding document: ", e);
+            }
+        }
+
+        // Start the countdown to expire the link
+        function startCountdown(expiryTime, shortUrl) {
+            let timeLeft = Math.floor((expiryTime - Date.now()) / 1000); // Time left in seconds
+
+            const countdownInterval = setInterval(async () => {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('timer').textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    document.getElementById('shortened-url').textContent = 'Link Expired';
+
+                    // Delete the expired link from Firestore
+                    const querySnapshot = await getDoc(doc(db, "urls", shortUrl));
+                    if (querySnapshot.exists()) {
+                        await deleteDoc(doc(db, "urls", querySnapshot.id));
+                    }
+                }
+                timeLeft--;
+            }, 1000);
+        }
+
+        // Copy the shortened URL to clipboard
+        function copyToClipboard() {
+            const textToCopy = document.getElementById('shortened-url').textContent;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert('Shortened URL copied to clipboard');
+            });
+        }
+
+        document.getElementById('generate-btn').addEventListener('click', generateShortURL);
+        document.getElementById('copy-btn').addEventListener('click', copyToClipboard);
+        document.getElementById('reset-btn').addEventListener('click', () => location.reload());
+        document.getElementById('regenerate-btn').addEventListener('click', generateShortURL);
+    </script>
 </head>
 <body>
     <header>
@@ -23,8 +107,10 @@
             <div class="dropdown-content">
                 <a href="url-short.html">URL SHORTENER</a>
                 <a href="qr-code-gen.html">QR CODE GENERATOR</a>
-                <a href="#">CALENDAR</a>
                 <a href="#">NOTES ADDER</a>
+                <a href="#">CALENDAR</a>
+                <a href="#">TRANSLATOR</a>
+                <a href="#">CURRENCY CONVERTER</a>
             </div>
         </div>
     </header>
@@ -47,71 +133,5 @@
     <footer>
         <p>MADE WITH <span>❤️</span> BY TEAM SSAV</p>
     </footer>
-
-    <script>
-        const generateBtn = document.getElementById('generate-btn');
-        const resultContainer = document.getElementById('result-container');
-        const shortenedUrl = document.getElementById('shortened-url');
-        const copyBtn = document.getElementById('copy-btn');
-        const resetBtn = document.getElementById('reset-btn');
-        const regenerateBtn = document.getElementById('regenerate-btn');
-        const timerElement = document.getElementById('timer');
-        let countdownInterval;
-
-        function generateShortURL() {
-            const originalUrl = document.getElementById('original-url').value;
-            if (originalUrl === '') {
-                alert('Please enter a valid URL');
-                return;
-            }
-
-            const shortUrl = 'swiftlink-' + Math.random().toString(36).substring(2, 8);
-            shortenedUrl.textContent = shortUrl;
-            resultContainer.style.display = 'block';
-            startCountdown();
-        }
-
-        function startCountdown() {
-            let timeLeft = 600; // 10 minutes in seconds
-
-            countdownInterval = setInterval(() => {
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-                timerElement.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
-                
-                if (timeLeft === 0) {
-                    clearInterval(countdownInterval);
-                    shortenedUrl.textContent = 'Link Expired';
-                }
-
-                timeLeft--;
-            }, 1000);
-        }
-
-        function resetShortURL() {
-            document.getElementById('original-url').value = '';
-            shortenedUrl.textContent = '';
-            resultContainer.style.display = 'none';
-            clearInterval(countdownInterval);
-            timerElement.textContent = '10:00';
-        }
-
-        function regenerateShortURL() {
-            clearInterval(countdownInterval);
-            generateShortURL();
-        }
-
-        function copyToClipboard() {
-            const textToCopy = shortenedUrl.textContent;
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                alert('Shortened URL copied to clipboard');
-            });
-        }
-
-        generateBtn.addEventListener('click', generateShortURL);
-        resetBtn.addEventListener('click', resetShortURL);
-        regenerateBtn.addEventListener('click', regenerateShortURL);
-        copyBtn.addEventListener('click', copyToClipboard);
-    </script>
 </body>
 </html>

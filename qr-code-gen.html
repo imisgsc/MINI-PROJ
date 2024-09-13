@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SwiftLink</title>
+    <title>SwiftLink - QR Code Generator</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inria+Sans:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
@@ -16,7 +18,7 @@
         <div class="tagline">
             STREAMLINE . SHORTEN . SIMPLIFY
         </div>
-        <div class="tools-dropdown">`
+        <div class="tools-dropdown">
             <button class="dropdownbtn"><b>Tools</b></button>
             <div class="dropdown-content">
                 <a href="url-short.html">URL SHORTENER</a>
@@ -29,10 +31,50 @@
         </div>
     </header>
     <main>
-        
+        <div class="qr-generator-container">
+            <h1>SwiftLink - QR Code Generator</h1>
+            <input type="text" id="input-text" placeholder="Enter text or URL">
+            <button id="generate-btn">Generate QR Code</button>
+
+            <div id="qr-code-container" style="display: none;">
+                <div id="qr-code"></div>
+                <button id="download-btn">Download QR Code</button>
+                <button id="reset-btn">Reset</button>
+            </div>
+        </div>
     </main>
+
     <footer>
         <p>MADE WITH <span>❤️</span> BY TEAM SSAV</p>
     </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
+    <script>
+        document.getElementById('generate-btn').addEventListener('click', function() {
+            const inputText = document.getElementById('input-text').value;
+            if (inputText === '') {
+                alert('Please enter some text or URL');
+                return;
+            }
+
+            $('#qr-code').empty().qrcode({ text: inputText });
+            document.getElementById('qr-code-container').style.display = 'block';
+        });
+
+        document.getElementById('download-btn').addEventListener('click', function() {
+            const qrCode = document.querySelector('#qr-code img');
+            const link = document.createElement('a');
+            link.href = qrCode.src;
+            link.download = 'qrcode.png';
+            link.click();
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', function() {
+            document.getElementById('input-text').value = '';
+            document.getElementById('qr-code-container').style.display = 'none';
+            $('#qr-code').empty();
+        });
+    </script>
 </body>
 </html>

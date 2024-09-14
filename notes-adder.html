@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SwiftLink</title>
+    <title>SwiftLink - Notes Adder</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inria+Sans:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
@@ -28,11 +29,130 @@
             </div>
         </div>
     </header>
+
     <main>
-        
+        <div class="notes-container">
+            <h1>Notes Adder Tool</h1>
+            <form id="note-form">
+                <input type="text" id="note-title" placeholder="Note Title" required>
+                <textarea id="note-body" rows="5" placeholder="Note Body" required></textarea>
+                <input type="url" id="note-url" placeholder="Associated URL (optional)">
+                <button type="submit" id="save-btn">Save Note</button>
+            </form>
+
+            <div id="notes-list">
+                <h2>Your Notes</h2>
+                <div id="notes-container"></div>
+            </div>
+        </div>
     </main>
+
     <footer>
         <p>MADE WITH <span>❤️</span> BY TEAM SSAV</p>
     </footer>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+
+    <script>
+        // Firebase configuration (your config should be placed here)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCVc09kuS08iwwky7PlX-3isJXHuSOQWOc",
+            authDomain: "swiftlink-48d4f.firebaseapp.com",
+            projectId: "swiftlink-48d4f",
+            storageBucket: "swiftlink-48d4f.appspot.com",
+            messagingSenderId: "820735048662",
+            appId: "1:820735048662:web:d8b239066781c6cb188277",
+            measurementId: "G-2VN60N67E6"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const noteForm = document.getElementById('note-form');
+        const notesContainer = document.getElementById('notes-container');
+
+        // Function to save a new note
+        noteForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('note-title').value;
+            const body = document.getElementById('note-body').value;
+            const url = document.getElementById('note-url').value;
+            const timestamp = new Date().toISOString();
+
+            try {
+                await db.collection('notes').add({
+                    title,
+                    body,
+                    url,
+                    timestamp
+                });
+                alert('Note saved!');
+                loadNotes();  // Reload the notes list
+                noteForm.reset(); // Reset the form fields
+            } catch (error) {
+                console.error('Error adding note: ', error);
+            }
+        });
+
+        // Function to load notes
+        async function loadNotes() {
+            notesContainer.innerHTML = '';
+            const notesSnapshot = await db.collection('notes').orderBy('timestamp', 'desc').get();
+            notesSnapshot.forEach(doc => {
+                const note = doc.data();
+                notesContainer.innerHTML += `
+                    <div class="note-item" id="${doc.id}">
+                        <h3>${note.title}</h3>
+                        <p>${note.body}</p>
+                        ${note.url ? `<a href="${note.url}" target="_blank">${note.url}</a>` : ''}
+                        <p>Last modified: ${new Date(note.timestamp).toLocaleString()}</p>
+                        <button onclick="deleteNote('${doc.id}')">Delete</button>
+                        <button onclick="editNote('${doc.id}', '${note.title}', '${note.body}', '${note.url}')">Edit</button>
+                    </div>
+                `;
+            });
+        }
+
+        // Function to delete a note
+        async function deleteNote(noteId) {
+            await db.collection('notes').doc(noteId).delete();
+            alert('Note deleted');
+            loadNotes();
+        }
+
+        // Function to edit a note
+        function editNote(noteId, title, body, url) {
+            document.getElementById('note-title').value = title;
+            document.getElementById('note-body').value = body;
+            document.getElementById('note-url').value = url;
+
+            document.getElementById('save-btn').textContent = 'Update Note';
+            document.getElementById('save-btn').onclick = async function(e) {
+                e.preventDefault();
+                const newTitle = document.getElementById('note-title').value;
+                const newBody = document.getElementById('note-body').value;
+                const newUrl = document.getElementById('note-url').value;
+                const newTimestamp = new Date().toISOString();
+
+                await db.collection('notes').doc(noteId).update({
+                    title: newTitle,
+                    body: newBody,
+                    url: newUrl,
+                    timestamp: newTimestamp
+                });
+
+                alert('Note updated');
+                loadNotes();
+                noteForm.reset();
+                document.getElementById('save-btn').textContent = 'Save Note';
+            };
+        }
+
+        // Load notes on page load
+        loadNotes();
+    </script>
 </body>
 </html>

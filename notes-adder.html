@@ -6,6 +6,7 @@
     <title>SwiftLink - Notes Adder</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inria+Sans:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
@@ -29,34 +30,32 @@
             </div>
         </div>
     </header>
-
     <main>
         <div class="notes-container">
-            <h1>Notes Adder Tool</h1>
-            <form id="note-form">
-                <input type="text" id="note-title" placeholder="Note Title" required>
-                <textarea id="note-body" rows="5" placeholder="Note Body" required></textarea>
-                <input type="url" id="note-url" placeholder="Associated URL (optional)">
-                <button type="submit" id="save-btn">Save Note</button>
-            </form>
-
+            <h1>SwiftLink- Notes Adder</h1>
+            <div class="note-form">
+                <input type="text" id="note-title" placeholder="Enter note title">
+                <div class="buttons">
+                    <button id="add-note-btn">Add</button>
+                    <button id="edit-note-btn" style="display:none;">Edit</button>
+                    <button id="delete-note-btn" style="display:none;">Delete</button>
+                </div>
+            </div>
             <div id="notes-list">
-                <h2>Your Notes</h2>
-                <div id="notes-container"></div>
+                <!-- Notes will be dynamically added here -->
             </div>
         </div>
     </main>
-
     <footer>
         <p>MADE WITH <span>❤️</span> BY TEAM SSAV</p>
     </footer>
 
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-firestore.js";
 
-    <script>
-        // Firebase configuration (your config should be placed here)
+        // Your Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCVc09kuS08iwwky7PlX-3isJXHuSOQWOc",
             authDomain: "swiftlink-48d4f.firebaseapp.com",
@@ -68,90 +67,91 @@
         };
 
         // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const notesCollection = collection(db, "notes");
 
-        const noteForm = document.getElementById('note-form');
-        const notesContainer = document.getElementById('notes-container');
+        let currentNoteId = null;
 
-        // Function to save a new note
-        noteForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        document.getElementById('add-note-btn').addEventListener('click', async () => {
             const title = document.getElementById('note-title').value;
-            const body = document.getElementById('note-body').value;
-            const url = document.getElementById('note-url').value;
-            const timestamp = new Date().toISOString();
-
-            try {
-                await db.collection('notes').add({
-                    title,
-                    body,
-                    url,
-                    timestamp
-                });
-                alert('Note saved!');
-                loadNotes();  // Reload the notes list
-                noteForm.reset(); // Reset the form fields
-            } catch (error) {
-                console.error('Error adding note: ', error);
+            if (title.trim() === '') {
+                alert('Please enter a note title.');
+                return;
             }
+
+            await addDoc(notesCollection, {
+                title
+            });
+
+            document.getElementById('note-title').value = '';
+            loadNotes();
         });
 
-        // Function to load notes
+        document.getElementById('edit-note-btn').addEventListener('click', async () => {
+            const title = document.getElementById('note-title').value;
+            if (title.trim() === '' || currentNoteId === null) {
+                alert('Please enter a note title and select a note to edit.');
+                return;
+            }
+
+            await updateDoc(doc(db, "notes", currentNoteId), {
+                title
+            });
+
+            document.getElementById('note-title').value = '';
+            document.getElementById('add-note-btn').style.display = 'inline-block';
+            document.getElementById('edit-note-btn').style.display = 'none';
+            document.getElementById('delete-note-btn').style.display = 'none';
+            currentNoteId = null;
+
+            loadNotes();
+        });
+
+        document.getElementById('delete-note-btn').addEventListener('click', async () => {
+            if (currentNoteId === null) {
+                alert('Please select a note to delete.');
+                return;
+            }
+
+            await deleteDoc(doc(db, "notes", currentNoteId));
+
+            document.getElementById('note-title').value = '';
+            document.getElementById('add-note-btn').style.display = 'inline-block';
+            document.getElementById('edit-note-btn').style.display = 'none';
+            document.getElementById('delete-note-btn').style.display = 'none';
+            currentNoteId = null;
+
+            loadNotes();
+        });
+
         async function loadNotes() {
-            notesContainer.innerHTML = '';
-            const notesSnapshot = await db.collection('notes').orderBy('timestamp', 'desc').get();
-            notesSnapshot.forEach(doc => {
+            const querySnapshot = await getDocs(notesCollection);
+            const notesList = document.getElementById('notes-list');
+            notesList.innerHTML = '';
+
+            querySnapshot.forEach(doc => {
                 const note = doc.data();
-                notesContainer.innerHTML += `
-                    <div class="note-item" id="${doc.id}">
-                        <h3>${note.title}</h3>
-                        <p>${note.body}</p>
-                        ${note.url ? `<a href="${note.url}" target="_blank">${note.url}</a>` : ''}
-                        <p>Last modified: ${new Date(note.timestamp).toLocaleString()}</p>
-                        <button onclick="deleteNote('${doc.id}')">Delete</button>
-                        <button onclick="editNote('${doc.id}', '${note.title}', '${note.body}', '${note.url}')">Edit</button>
-                    </div>
+                const noteId = doc.id;
+
+                const noteElement = document.createElement('div');
+                noteElement.className = 'note-item';
+                noteElement.innerHTML = `
+                    <strong>${note.title}</strong>
+                    <button onclick="selectNote('${noteId}', '${note.title}')">Select</button>
                 `;
+                notesList.appendChild(noteElement);
             });
         }
 
-        // Function to delete a note
-        async function deleteNote(noteId) {
-            await db.collection('notes').doc(noteId).delete();
-            alert('Note deleted');
-            loadNotes();
-        }
-
-        // Function to edit a note
-        function editNote(noteId, title, body, url) {
+        window.selectNote = (id, title) => {
             document.getElementById('note-title').value = title;
-            document.getElementById('note-body').value = body;
-            document.getElementById('note-url').value = url;
+            document.getElementById('add-note-btn').style.display = 'none';
+            document.getElementById('edit-note-btn').style.display = 'inline-block';
+            document.getElementById('delete-note-btn').style.display = 'inline-block';
+            currentNoteId = id;
+        };
 
-            document.getElementById('save-btn').textContent = 'Update Note';
-            document.getElementById('save-btn').onclick = async function(e) {
-                e.preventDefault();
-                const newTitle = document.getElementById('note-title').value;
-                const newBody = document.getElementById('note-body').value;
-                const newUrl = document.getElementById('note-url').value;
-                const newTimestamp = new Date().toISOString();
-
-                await db.collection('notes').doc(noteId).update({
-                    title: newTitle,
-                    body: newBody,
-                    url: newUrl,
-                    timestamp: newTimestamp
-                });
-
-                alert('Note updated');
-                loadNotes();
-                noteForm.reset();
-                document.getElementById('save-btn').textContent = 'Save Note';
-            };
-        }
-
-        // Load notes on page load
         loadNotes();
     </script>
 </body>

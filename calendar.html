@@ -8,7 +8,7 @@
     <script type="module">
         // Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-firestore.js";
 
         // Your Firebase configuration
         const firebaseConfig = {
@@ -64,6 +64,16 @@
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
 
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            
+            // Create header row for days of the week
+            dayNames.forEach(dayName => {
+                const headerCell = document.createElement('div');
+                headerCell.classList.add('day-header');
+                headerCell.textContent = dayName;
+                calendarGrid.appendChild(headerCell);
+            });
+
             for (let i = 0; i < firstDay; i++) {
                 const blankCell = document.createElement('div');
                 blankCell.classList.add('blank-day');
@@ -93,7 +103,7 @@
                 const eventItem = document.createElement('li');
                 eventItem.classList.add('event-item');
                 eventItem.innerHTML = `
-                    <span>${event.text}</span>
+                    <input type="text" class="event-text" value="${event.text}" readonly>
                     <button class="edit-event">Edit</button>
                     <button class="delete-event">Delete</button>
                 `;
@@ -101,11 +111,19 @@
 
                 // Handle event editing
                 eventItem.querySelector('.edit-event').addEventListener('click', () => {
-                    const newText = prompt("Edit event:", event.text);
-                    if (newText) {
-                        updateDoc(doc(db, "calendarEvents", event.id), { text: newText });
-                        event.text = newText;
-                        renderEvents();
+                    const eventTextInput = eventItem.querySelector('.event-text');
+                    if (eventTextInput.hasAttribute('readonly')) {
+                        eventTextInput.removeAttribute('readonly');
+                        eventTextInput.focus();
+                        eventItem.querySelector('.edit-event').textContent = 'Save';
+                    } else {
+                        const newText = eventTextInput.value;
+                        if (newText) {
+                            updateDoc(doc(db, "calendarEvents", event.id), { text: newText });
+                            event.text = newText;
+                            eventTextInput.setAttribute('readonly', true);
+                            eventItem.querySelector('.edit-event').textContent = 'Edit';
+                        }
                     }
                 });
 
@@ -165,8 +183,7 @@
             <img src="assets/logo.png" alt="SwiftLink Logo">
         </div>
         <div class="tagline">
-            STREAMLINE . ADD EVENTS . MANAGE DATES
-        </div>
+            STREAMLINE . ADD EVENTS . MANAGE DATES</div>
         <div class="tools-dropdown">
             <button class="dropdownbtn"><b>Tools</b></button>
             <div class="dropdown-content">
@@ -182,6 +199,7 @@
 
     <main>
         <div class="calendar-container">
+            <h1>SwiftLink - Calendar</h1>
             <div class="calendar-header">
                 <button id="prev-month">←</button>
                 <h2 id="current-month-year">September 2024</h2>

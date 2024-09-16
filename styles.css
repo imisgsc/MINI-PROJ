@@ -21,9 +21,10 @@ header {
 }
 
 .tagline {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
     font-family: 'Inria Sans', sans-serif;
+    margin: 0;
 }
 
 .tools-dropdown button {
@@ -312,6 +313,11 @@ main {
     text-align: center;
 }
 
+.calendar-container h1{
+    color: #001E6C;
+    margin-top: 4px;
+}
+
 .calendar-header {
     display: flex;
     justify-content: space-between;
@@ -319,14 +325,18 @@ main {
     margin-bottom: 20px;
 }
 
-.calendar-header.prev-month{
-    color: #001E6C;
-}
-
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 10px;
+}
+
+.day-header {
+    padding: 10px;
+    background-color: #035397;
+    color: white;
+    border: 1px solid #ccc;
+    text-align: center;
 }
 
 .day, .blank-day {
@@ -386,6 +396,12 @@ main {
 
 .event-item span {
     flex-grow: 1;
+}
+
+.event-item input.event-text {
+    border: none;
+    background: transparent;
+    width: 100%;
 }
 
 .event-item button {

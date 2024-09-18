@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SwiftLink - Translator</title>
+    <title>SwiftLink</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://kit.fontawesome.com/a529d2affe.js" crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
@@ -13,114 +15,20 @@
             <img src="assets/logo.png" alt="SwiftLink Logo">
         </div>
         <div class="tagline">
-            STREAMLINE . LINGUISTICS . TRANSLATE
+            STREAMLINE . TRANSLATE . LEARN
         </div>
         <button class="dropdownbtn" class="fa-solid fa-house" onclick="window.location.href='index.html';">
             <span class="icon-wrapper">
               <i class="fa-solid fa-house"></i>
             </span>
             <span class="text-wrapper">HOME</span>
-        </button>
+          </button>
     </header>
-
     <main>
-        <div class="translator-container">
-            <div class="translate-section">
-                <!-- From Language Selector -->
-                <select id="from-lang">
-                    <!-- Languages will be added dynamically -->
-                </select>
-                
-                <!-- User Input for Text -->
-                <textarea id="from-text" placeholder="Enter text"></textarea>
-            </div>
-            
-            <!-- Arrow for Switching Languages -->
-            <div class="swap-button">
-                <i class="fa-solid fa-arrow-right-arrow-left" id="swap-languages"></i>
-            </div>
-            
-            <div class="translate-section">
-                <!-- To Language Selector -->
-                <select id="to-lang">
-                    <!-- Languages will be added dynamically -->
-                </select>
-
-                <!-- Translated Text Display -->
-                <textarea id="to-text" placeholder="Translation will appear here" readonly></textarea>
-            </div>
-
-            <!-- Translate Button -->
-            <div class="center-btn">
-                <button id="translate-btn">Translate</button>
-            </div>
-        </div>
+        
     </main>
-
     <footer>
         <p>MADE WITH <span>❤️</span> BY TEAM SSAV</p>
     </footer>
-
-    <script>
-        // List of supported languages for demonstration
-        const languages = {
-            "en": "English",
-            "es": "Spanish",
-            "fr": "French",
-            "de": "German",
-            "hi": "Hindi",
-            "zh": "Chinese",
-            "ja": "Japanese",
-            // Add more languages here
-        };
-
-        const fromLang = document.getElementById("from-lang");
-        const toLang = document.getElementById("to-lang");
-        const translateBtn = document.getElementById("translate-btn");
-        const fromText = document.getElementById("from-text");
-        const toText = document.getElementById("to-text");
-
-        // Populate the language dropdowns
-        function populateLanguages() {
-            for (const [code, name] of Object.entries(languages)) {
-                const option1 = document.createElement("option");
-                option1.value = code;
-                option1.textContent = name;
-                fromLang.appendChild(option1);
-
-                const option2 = document.createElement("option");
-                option2.value = code;
-                option2.textContent = name;
-                toLang.appendChild(option2);
-            }
-            // Set default selections
-            fromLang.value = "en"; // English
-            toLang.value = "es"; // Spanish
-        }
-
-        // Swap the languages
-        document.getElementById('swap-languages').addEventListener('click', () => {
-            const temp = fromLang.value;
-            fromLang.value = toLang.value;
-            toLang.value = temp;
-        });
-
-        // Perform translation (dummy API simulation)
-        translateBtn.addEventListener("click", () => {
-            const text = fromText.value;
-            if (text.trim() === '') {
-                alert('Please enter text to translate.');
-                return;
-            }
-            const from = fromLang.value;
-            const to = toLang.value;
-
-            // Simulating API call for translation
-            toText.value = `[Translation from ${languages[from]} to ${languages[to]}]: ${text}`;
-        });
-
-        // Load the languages on page load
-        window.onload = populateLanguages;
-    </script>
 </body>
 </html>

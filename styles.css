@@ -447,7 +447,59 @@ main {
     color: white;
 }
 
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 
+h1 {
+    color: #001E6C;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+textarea.form-control {
+    resize: none;
+}
+
+button.btn {
+    background-color: #001E6C;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+}
+
+button.btn:hover {
+    background-color: #FFAA4C;
+}
+
+#translated_text_container {
+    display: none;
+}
+
+#translated_text {
+    font-size: 18px;
+    font-weight: bold;
+}
 
 /* Footer */
 footer {

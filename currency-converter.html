@@ -6,8 +6,10 @@
     <title>SwiftLink</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://kit.fontawesome.com/a529d2affe.js" crossorigin="anonymous"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
@@ -17,18 +19,83 @@
         <div class="tagline">
             STREAMLINE . EXCHANGE RATES . KNOW BETTER
         </div>
-        <button class="dropdownbtn" class="fa-solid fa-house" onclick="window.location.href='index.html';">
+        <button class="dropdownbtn" onclick="window.location.href='index.html';">
             <span class="icon-wrapper">
-              <i class="fa-solid fa-house"></i>
+                <i class="fa-solid fa-house"></i>
             </span>
             <span class="text-wrapper">HOME</span>
-          </button>
+        </button>
     </header>
     <main>
-        
+        <section class="currency-converter">
+            <h2>Currency Converter</h2>
+            <div class="converter-form">
+                <input type="number" id="amount" placeholder="Amount" />
+                <select id="fromCurrency">
+                    <!-- Options populated by JavaScript -->
+                </select>
+                <select id="toCurrency">
+                    <!-- Options populated by JavaScript -->
+                </select>
+                <button onclick="convertCurrency()">Convert</button>
+            </div>
+            <div id="result"></div>
+        </section>
     </main>
     <footer>
         <p>MADE WITH <span>❤️</span> BY TEAM SSAV</p>
     </footer>
+
+    <script>
+        // Populate currency options
+        async function populateCurrencyOptions() {
+            try {
+                const response = await fetch('https://api.frankfurter.app/currencies');
+                const currencies = await response.json();
+                const fromCurrency = document.getElementById('fromCurrency');
+                const toCurrency = document.getElementById('toCurrency');
+                
+                for (let currency in currencies) {
+                    const option1 = document.createElement('option');
+                    option1.value = currency;
+                    option1.text = currency;
+                    fromCurrency.appendChild(option1);
+                    
+                    const option2 = document.createElement('option');
+                    option2.value = currency;
+                    option2.text = currency;
+                    toCurrency.appendChild(option2);
+                }
+                fromCurrency.value = 'USD'; // Default from currency
+                toCurrency.value = 'EUR';   // Default to currency
+            } catch (error) {
+                document.getElementById('result').innerText = 'Error loading currencies.';
+            }
+        }
+
+        // Convert currency function
+        async function convertCurrency() {
+            const amount = document.getElementById('amount').value;
+            const from = document.getElementById('fromCurrency').value;
+            const to = document.getElementById('toCurrency').value;
+            
+            if (amount === '' || isNaN(amount)) {
+                document.getElementById('result').innerText = 'Please enter a valid amount.';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`https://api.frankfurter.app/latest?amount=${amount}&from=${from}&to=${to}`);
+                const data = await response.json();
+                const convertedAmount = data.rates[to];
+                document.getElementById('result').innerText = `${amount} ${from} = ${convertedAmount.toFixed(2)} ${to}`;
+            } catch (error) {
+                document.getElementById('result').innerText = 'Conversion failed. Please try again later.';
+            }
+        }
+
+        // Initialize currency options on page load
+        document.addEventListener('DOMContentLoaded', populateCurrencyOptions);
+    </script>
 </body>
 </html>

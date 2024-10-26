@@ -456,48 +456,50 @@ main {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-h1 {
-    color: #001E6C;
+
+.currency-converter {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
     text-align: center;
-    margin-bottom: 20px;
 }
 
-.form-group {
-    margin-bottom: 15px;
+.currency-converter h2 {
+    margin-bottom: 1rem;
+    color: #001E6C;
 }
 
-.form-control {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+.converter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-textarea.form-control {
-    resize: none;
+.converter-form input,
+.converter-form select,
+.converter-form button {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
 }
 
-button.btn {
+.converter-form button {
     background-color: #001E6C;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
+    color: #fff;
     cursor: pointer;
-    display: block;
-    margin: 0 auto;
+    transition: background-color 0.3s;
 }
 
-button.btn:hover {
+.converter-form button:hover {
     background-color: #FFAA4C;
 }
 
-#translated_text_container {
-    display: none;
-}
-
-#translated_text {
-    font-size: 18px;
+#result {
+    margin-top: 1rem;
+    font-size: 1.2rem;
     font-weight: bold;
 }
 

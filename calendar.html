@@ -7,20 +7,193 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://kit.fontawesome.com/a529d2affe.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inria+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+    <script type="module">
+        // Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-firestore.js";
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCVc09kuS08iwwky7PlX-3isJXHuSOQWOc",
+            authDomain: "swiftlink-48d4f.firebaseapp.com",
+            projectId: "swiftlink-48d4f",
+            storageBucket: "swiftlink-48d4f.appspot.com",
+            messagingSenderId: "820735048662",
+            appId: "1:820735048662:web:d8b239066781c6cb188277",
+            measurementId: "G-2VN60N67E6"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // DOM elements
+        const calendarGrid = document.getElementById('calendar-grid');
+        const currentMonthYear = document.getElementById('current-month-year');
+        const selectedDateElem = document.getElementById('selected-date');
+        const eventInput = document.getElementById('event-input');
+        const eventList = document.getElementById('event-list');
+
+        let selectedDate = '';
+        let currentDate = new Date();
+        let events = {};
+
+        // Load existing events from Firebase
+        async function loadEvents() {
+            const eventsCollection = collection(db, "calendarEvents");
+            const eventSnapshot = await getDocs(eventsCollection);
+            eventSnapshot.forEach(doc => {
+                const eventData = doc.data();
+                if (!events[eventData.date]) {
+                    events[eventData.date] = [];
+                }
+                events[eventData.date].push({
+                    id: doc.id,
+                    text: eventData.text
+                });
+            });
+            renderEvents();
+        }
+
+        // Render the calendar
+        function renderCalendar() {
+            calendarGrid.innerHTML = '';
+            const month = currentDate.getMonth();
+            const year = currentDate.getFullYear();
+
+            currentMonthYear.textContent = `${currentDate.toLocaleString('default', { month: 'long' })} ${year}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+            // Create header row for days of the week
+            dayNames.forEach(dayName => {
+                const headerCell = document.createElement('div');
+                headerCell.classList.add('day-header');
+                headerCell.textContent = dayName;
+                calendarGrid.appendChild(headerCell);
+            });
+
+            for (let i = 0; i < firstDay; i++) {
+                const blankCell = document.createElement('div');
+                blankCell.classList.add('blank-day');
+                calendarGrid.appendChild(blankCell);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayCell = document.createElement('div');
+                dayCell.classList.add('day');
+                dayCell.textContent = day;
+
+                dayCell.addEventListener('click', () => {
+                    selectedDate = `${year}-${month + 1}-${day}`;
+                    selectedDateElem.textContent = selectedDate;
+                    renderEvents();
+                });
+
+                calendarGrid.appendChild(dayCell);
+            }
+        }
+
+        // Render events for the selected date
+        function renderEvents() {
+            eventList.innerHTML = '';
+            const eventForDay = events[selectedDate] || [];
+            eventForDay.forEach(event => {
+                const eventItem = document.createElement('li');
+                eventItem.classList.add('event-item');
+                eventItem.innerHTML = `
+                    <input type="text" class="event-text" value="${event.text}" readonly>
+                    <button class="edit-event">Edit</button>
+                    <button class="delete-event">Delete</button>
+                `;
+                eventList.appendChild(eventItem);
+
+                // Handle event editing
+                eventItem.querySelector('.edit-event').addEventListener('click', async () => {
+                    const eventTextInput = eventItem.querySelector('.event-text');
+                    if (eventTextInput.hasAttribute('readonly')) {
+                        eventTextInput.removeAttribute('readonly');
+                        eventTextInput.focus();
+                        eventItem.querySelector('.edit-event').textContent = 'Save';
+                    } else {
+                        const newText = eventTextInput.value;
+                        if (newText) {
+                            await updateDoc(doc(db, "calendarEvents", event.id), { text: newText });
+                            event.text = newText; // Update local data
+                            eventTextInput.setAttribute('readonly', true);
+                            eventItem.querySelector('.edit-event').textContent = 'Edit';
+                        }
+                    }
+                });
+
+                // Handle event deletion
+                eventItem.querySelector('.delete-event').addEventListener('click', async () => {
+                    await deleteDoc(doc(db, "calendarEvents", event.id));
+                    events[selectedDate] = events[selectedDate].filter(e => e.id !== event.id);
+                    renderEvents();
+                });
+            });
+        }
+
+        // Add a new event
+        document.getElementById('add-event').addEventListener('click', async () => {
+            const eventText = eventInput.value;
+            if (eventText === '' || selectedDate === '') {
+                alert('Please select a date and enter an event.');
+                return;
+            }
+
+            const newEvent = await addDoc(collection(db, "calendarEvents"), {
+                date: selectedDate,
+                text: eventText
+            });
+
+            if (!events[selectedDate]) {
+                events[selectedDate] = [];
+            }
+            events[selectedDate].push({
+                id: newEvent.id,
+                text: eventText
+            });
+
+            eventInput.value = ''; // Clear the input field after adding the event
+            renderEvents(); // Update the event list display
+        });
+
+        // Handle month navigation
+        document.getElementById('prev-month').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+            loadEvents(); // Load events after changing month
+        });
+
+        document.getElementById('next-month').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+            loadEvents(); // Load events after changing month
+        });
+
+        // Initialize calendar
+        renderCalendar();
+        loadEvents();
+    </script>
 </head>
 <body>
     <header>
         <div class="logo">
             <img src="assets/logo.png" alt="SwiftLink Logo">
         </div>
-        <div class="tagline">STREAMLINE . ADD . MANAGE DATES</div>
-        <button class="dropdownbtn" onclick="window.location.href='index.html';">
-            <span class="icon-wrapper">
-              <i class="fa-solid fa-house"></i>
-            </span>
-            <span class="text-wrapper">HOME</span>
-        </button>
+        <div class="tagline">
+            STREAMLINE . ADD . MANAGE DATES</div>
+            <button class="dropdownbtn" class="fa-solid fa-house" onclick="window.location.href='index.html';">
+                <span class="icon-wrapper">
+                  <i class="fa-solid fa-house"></i>
+                </span>
+                <span class="text-wrapper">HOME</span>
+              </button>
     </header>
 
     <main>
@@ -45,180 +218,5 @@
     <footer>
         <p>MADE WITH <span>❤️</span> BY TEAM SSAV</p>
     </footer>
-
-    <!-- Move script to the end of the body for better DOM handling -->
-    <script type="module">
-        // Firebase SDK
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-firestore.js";
-
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCVc09kuS08iwwky7PlX-3isJXHuSOQWOc",
-            authDomain: "swiftlink-48d4f.firebaseapp.com",
-            projectId: "swiftlink-48d4f",
-            storageBucket: "swiftlink-48d4f.appspot.com",
-            messagingSenderId: "820735048662",
-            appId: "1:820735048662:web:d8b239066781c6cb188277",
-            measurementId: "G-2VN60N67E6"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        window.onload = function() {
-            // DOM elements
-            const calendarGrid = document.getElementById('calendar-grid');
-            const currentMonthYear = document.getElementById('current-month-year');
-            const selectedDateElem = document.getElementById('selected-date');
-            const eventInput = document.getElementById('event-input');
-            const eventList = document.getElementById('event-list');
-
-            let selectedDate = '';
-            let currentDate = new Date();
-            let events = {};
-
-            // Load existing events from Firebase
-            async function loadEvents() {
-                const eventsCollection = collection(db, "calendarEvents");
-                const eventSnapshot = await getDocs(eventsCollection);
-                eventSnapshot.forEach(doc => {
-                    const eventData = doc.data();
-                    if (!events[eventData.date]) {
-                        events[eventData.date] = [];
-                    }
-                    events[eventData.date].push({
-                        id: doc.id,
-                        text: eventData.text
-                    });
-                });
-                renderEvents();
-            }
-
-            // Render the calendar
-            function renderCalendar() {
-                calendarGrid.innerHTML = '';
-                const month = currentDate.getMonth();
-                const year = currentDate.getFullYear();
-
-                currentMonthYear.textContent = `${currentDate.toLocaleString('default', { month: 'long' })} ${year}`;
-
-                const firstDay = new Date(year, month, 1).getDay();
-                const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-                const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                
-                // Create header row for days of the week
-                dayNames.forEach(dayName => {
-                    const headerCell = document.createElement('div');
-                    headerCell.classList.add('day-header');
-                    headerCell.textContent = dayName;
-                    calendarGrid.appendChild(headerCell);
-                });
-
-                for (let i = 0; i < firstDay; i++) {
-                    const blankCell = document.createElement('div');
-                    blankCell.classList.add('blank-day');
-                    calendarGrid.appendChild(blankCell);
-                }
-
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const dayCell = document.createElement('div');
-                    dayCell.classList.add('day');
-                    dayCell.textContent = day;
-
-                    dayCell.addEventListener('click', () => {
-                        selectedDate = `${year}-${month + 1}-${day}`;
-                        selectedDateElem.textContent = selectedDate;
-                        renderEvents();
-                    });
-
-                    calendarGrid.appendChild(dayCell);
-                }
-            }
-
-            // Render events for the selected date
-            function renderEvents() {
-                eventList.innerHTML = '';
-                const eventForDay = events[selectedDate] || [];
-                eventForDay.forEach(event => {
-                    const eventItem = document.createElement('li');
-                    eventItem.classList.add('event-item');
-                    eventItem.innerHTML = `
-                        <input type="text" class="event-text" value="${event.text}" readonly>
-                        <button class="edit-event">Edit</button>
-                        <button class="delete-event">Delete</button>
-                    `;
-                    eventList.appendChild(eventItem);
-
-                    // Handle event editing
-                    eventItem.querySelector('.edit-event').addEventListener('click', () => {
-                        const eventTextInput = eventItem.querySelector('.event-text');
-                        if (eventTextInput.hasAttribute('readonly')) {
-                            eventTextInput.removeAttribute('readonly');
-                            eventTextInput.focus();
-                            eventItem.querySelector('.edit-event').textContent = 'Save';
-                        } else {
-                            const newText = eventTextInput.value;
-                            if (newText) {
-                                updateDoc(doc(db, "calendarEvents", event.id), { text: newText });
-                                event.text = newText;
-                                eventTextInput.setAttribute('readonly', true);
-                                eventItem.querySelector('.edit-event').textContent = 'Edit';
-                            }
-                        }
-                    });
-
-                    // Handle event deletion
-                    eventItem.querySelector('.delete-event').addEventListener('click', async () => {
-                        await deleteDoc(doc(db, "calendarEvents", event.id));
-                        events[selectedDate] = events[selectedDate].filter(e => e.id !== event.id);
-                        renderEvents();
-                    });
-                });
-            }
-
-            // Add a new event
-            document.getElementById('add-event').addEventListener('click', async () => {
-                const eventText = eventInput.value;
-                if (eventText === '' || selectedDate === '') {
-                    alert('Please select a date and enter an event.');
-                    return;
-                }
-
-                const newEvent = await addDoc(collection(db, "calendarEvents"), {
-                    date: selectedDate,
-                    text: eventText
-                });
-
-                if (!events[selectedDate]) {
-                    events[selectedDate] = [];
-                }
-                events[selectedDate].push({
-                    id: newEvent.id,
-                    text: eventText
-                });
-
-                eventInput.value = '';
-                renderEvents();
-            });
-
-            // Handle month navigation
-            document.getElementById('prev-month').addEventListener('click', () => {
-                currentDate.setMonth(currentDate.getMonth() - 1);
-                renderCalendar();
-            });
-
-            document.getElementById('next-month').addEventListener('click', () => {
-                currentDate.setMonth(currentDate.getMonth() + 1);
-                renderCalendar();
-            });
-
-            // Initialize calendar
-            renderCalendar();
-            loadEvents();
-        };
-    </script>
 </body>
 </html>

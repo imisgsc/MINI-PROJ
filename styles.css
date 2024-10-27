@@ -131,6 +131,7 @@ main {
     padding: 20px;
 }
 
+/* url shortener */
 .shortener-container {
     text-align: center;
     background-color: #fff;
@@ -182,6 +183,9 @@ main {
     margin-top: 10px;
 }
 
+
+/* qr code generator */
+
 .qr-generator-container {
     background-color: white;
     padding: 20px;
@@ -225,6 +229,7 @@ main {
     margin: 20px 0;
 }
 
+/* notes adder */
 .notes-container {
     max-width: 800px;
     margin: 0 auto;
@@ -277,7 +282,6 @@ main {
     background-color: #FFAA4C;
 }
 
-/* Notes List Styles */
 #notes-list {
     margin-top: 20px;
 }
@@ -335,6 +339,7 @@ main {
     background-color: #FFAA4C;
 }
 
+/* calendar */
 .calendar-container {
     max-width: 600px;
     text-align: center;
@@ -458,6 +463,8 @@ main {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+
+/* translator */
 .translator {
     max-width: 600px;
     text-align: center;
@@ -533,6 +540,7 @@ main {
     text-align: left;
 }
 
+/* currency converter */
 .currency-converter {
     max-width: 600px;
     text-align: center;

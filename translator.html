@@ -6,8 +6,7 @@
     <title>SwiftLink</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://kit.fontawesome.com/a529d2affe.js" crossorigin="anonymous"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
@@ -17,18 +16,191 @@
         <div class="tagline">
             STREAMLINE . TRANSLATE . LEARN
         </div>
-        <button class="dropdownbtn" class="fa-solid fa-house" onclick="window.location.href='index.html';">
+        <button class="dropdownbtn" onclick="window.location.href='index.html';">
             <span class="icon-wrapper">
-              <i class="fa-solid fa-house"></i>
+                <i class="fa-solid fa-house"></i>
             </span>
             <span class="text-wrapper">HOME</span>
-          </button>
+        </button>
     </header>
+    
     <main>
-        
+        <!-- Translation form -->
+        <div class="translator">
+            <h1>SwiftLink - Translator</h1>
+            <label for="inputText">Enter Text:</label>
+            <textarea id="inputText" rows="3" placeholder="Type text here..."></textarea>
+            
+            <label for="fromLanguage">From:</label>
+            <select id="fromLanguage"></select>
+            
+            <label for="toLanguage">To:</label>
+            <select id="toLanguage"></select>
+            
+            <button onclick="translateText()">Translate</button>
+            
+            <h3>Translation:</h3>
+            <p id="translatedText">Your translation will appear here.</p>
+        </div>
     </main>
+    
     <footer>
         <p>MADE WITH <span>❤️</span> BY TEAM SSAV</p>
     </footer>
+
+    <script>
+        // List of language codes and names
+        const languages = {
+            "af": "Afrikaans",
+            "sq": "Albanian",
+            "am": "Amharic",
+            "ar": "Arabic",
+            "hy": "Armenian",
+            "az": "Azerbaijani",
+            "eu": "Basque",
+            "be": "Belarusian",
+            "bn": "Bengali",
+            "bs": "Bosnian",
+            "bg": "Bulgarian",
+            "ca": "Catalan",
+            "ceb": "Cebuano",
+            "ny": "Chichewa",
+            "zh": "Chinese",
+            "co": "Corsican",
+            "hr": "Croatian",
+            "cs": "Czech",
+            "da": "Danish",
+            "nl": "Dutch",
+            "en": "English",
+            "eo": "Esperanto",
+            "et": "Estonian",
+            "tl": "Filipino",
+            "fi": "Finnish",
+            "fr": "French",
+            "fy": "Frisian",
+            "gl": "Galician",
+            "ka": "Georgian",
+            "de": "German",
+            "el": "Greek",
+            "gu": "Gujarati",
+            "ht": "Haitian Creole",
+            "ha": "Hausa",
+            "haw": "Hawaiian",
+            "he": "Hebrew",
+            "hi": "Hindi",
+            "hmn": "Hmong",
+            "hu": "Hungarian",
+            "is": "Icelandic",
+            "ig": "Igbo",
+            "id": "Indonesian",
+            "ga": "Irish",
+            "it": "Italian",
+            "ja": "Japanese",
+            "jw": "Javanese",
+            "kn": "Kannada",
+            "kk": "Kazakh",
+            "km": "Khmer",
+            "rw": "Kinyarwanda",
+            "ko": "Korean",
+            "ku": "Kurdish",
+            "ky": "Kyrgyz",
+            "lo": "Lao",
+            "la": "Latin",
+            "lv": "Latvian",
+            "lt": "Lithuanian",
+            "lb": "Luxembourgish",
+            "mk": "Macedonian",
+            "mg": "Malagasy",
+            "ms": "Malay",
+            "ml": "Malayalam",
+            "mt": "Maltese",
+            "mi": "Maori",
+            "mr": "Marathi",
+            "mn": "Mongolian",
+            "my": "Myanmar",
+            "ne": "Nepali",
+            "no": "Norwegian",
+            "or": "Odia",
+            "ps": "Pashto",
+            "fa": "Persian",
+            "pl": "Polish",
+            "pt": "Portuguese",
+            "pa": "Punjabi",
+            "ro": "Romanian",
+            "ru": "Russian",
+            "sm": "Samoan",
+            "gd": "Scots Gaelic",
+            "sr": "Serbian",
+            "st": "Sesotho",
+            "sn": "Shona",
+            "sd": "Sindhi",
+            "si": "Sinhala",
+            "sk": "Slovak",
+            "sl": "Slovenian",
+            "so": "Somali",
+            "es": "Spanish",
+            "su": "Sundanese",
+            "sw": "Swahili",
+            "sv": "Swedish",
+            "tg": "Tajik",
+            "ta": "Tamil",
+            "tt": "Tatar",
+            "te": "Telugu",
+            "th": "Thai",
+            "tr": "Turkish",
+            "tk": "Turkmen",
+            "uk": "Ukrainian",
+            "ur": "Urdu",
+            "ug": "Uyghur",
+            "uz": "Uzbek",
+            "vi": "Vietnamese",
+            "cy": "Welsh",
+            "xh": "Xhosa",
+            "yi": "Yiddish",
+            "yo": "Yoruba",
+            "zu": "Zulu"
+        };
+
+        // Populate dropdowns with languages
+        function populateLanguageDropdowns() {
+            const fromLanguageSelect = document.getElementById('fromLanguage');
+            const toLanguageSelect = document.getElementById('toLanguage');
+
+            for (const [code, name] of Object.entries(languages)) {
+                const optionFrom = document.createElement('option');
+                optionFrom.value = code;
+                optionFrom.textContent = name;
+                fromLanguageSelect.appendChild(optionFrom);
+
+                const optionTo = document.createElement('option');
+                optionTo.value = code;
+                optionTo.textContent = name;
+                toLanguageSelect.appendChild(optionTo);
+            }
+        }
+
+        // Call the function to populate dropdowns on page load
+        window.onload = populateLanguageDropdowns;
+
+        function translateText() {
+            const text = document.getElementById('inputText').value;
+            const fromLang = document.getElementById('fromLanguage').value;
+            const toLang = document.getElementById('toLanguage').value;
+
+            // Construct the Lingva API URL
+            const apiUrl = `https://lingva.ml/api/v1/${fromLang}/${toLang}/${encodeURIComponent(text)}`;
+
+            // Fetch the translation
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('translatedText').textContent = data.translation;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('translatedText').textContent = 'Translation failed.';
+                });
+        }
+    </script>
 </body>
 </html>

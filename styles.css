@@ -264,13 +264,13 @@ main {
 .note-form .buttons {
     display: flex;
     align-items: center;
-    color: #001E6C;
+    color: #035397;
 }
 
 .note-form button {
     padding: 10px 20px;
     margin-left: 10px;
-    background-color: #001E6C;
+    background-color: #035397;
     color: white;
     border: none;
     border-radius: 4px;
@@ -327,7 +327,7 @@ main {
 .note-item button {
     margin-left: 10px;
     padding: 5px 15px;
-    background-color: #001E6C;
+    background-color: #035397;
     color: white;
     border: none;
     border-radius: 4px;
@@ -508,7 +508,7 @@ main {
 .translator button {
     margin-top: 1.5rem;
     padding: 0.75rem 1.5rem;
-    background-color: #001E6C;
+    background-color: #035397;
     color: #ffffff;
     border: none;
     border-radius: 6px;
@@ -568,7 +568,7 @@ main {
 }
 
 .converter-form button {
-    background-color: #001E6C;
+    background-color: #035397;
     color: #fff;
     cursor: pointer;
     transition: background-color 0.3s;
